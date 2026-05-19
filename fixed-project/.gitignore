@@ -1,0 +1,12 @@
+# Author: Bekzhanuly Nurmukhamed
+target/
+*.class
+*.jar
+*.war
+.idea/
+*.iml
+.env
+logs/
+uploads/
+*.log
+.DS_Store
