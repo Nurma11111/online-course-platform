@@ -1,0 +1,51 @@
+{
+  "properties": [
+    {
+      "name": "async.core-pool-size",
+      "type": "java.lang.Integer",
+      "description": "Core number of threads in the async thread pool.",
+      "defaultValue": 5
+    },
+    {
+      "name": "async.max-pool-size",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of threads in the async thread pool.",
+      "defaultValue": 10
+    },
+    {
+      "name": "async.queue-capacity",
+      "type": "java.lang.Integer",
+      "description": "Queue capacity for the async thread pool.",
+      "defaultValue": 100
+    },
+    {
+      "name": "async.thread-name-prefix",
+      "type": "java.lang.String",
+      "description": "Prefix for async thread names.",
+      "defaultValue": "BekzhanulYAsync-"
+    },
+    {
+      "name": "jwt.secret",
+      "type": "java.lang.String",
+      "description": "Secret key used for JWT token signing."
+    },
+    {
+      "name": "jwt.expiration",
+      "type": "java.lang.Long",
+      "description": "JWT token expiration time in milliseconds.",
+      "defaultValue": 86400000
+    },
+    {
+      "name": "jwt.refresh-expiration",
+      "type": "java.lang.Long",
+      "description": "JWT refresh token expiration time in milliseconds.",
+      "defaultValue": 604800000
+    },
+    {
+      "name": "file.upload-dir",
+      "type": "java.lang.String",
+      "description": "Directory path for uploaded files.",
+      "defaultValue": "./uploads"
+    }
+  ]
+}
