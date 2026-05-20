@@ -1,0 +1,11 @@
+# Author: Bekzhanuly Nurmukhamed
+target/
+*.log
+logs/
+uploads/
+.git/
+.gitignore
+*.md
+.env
+.idea/
+*.iml
