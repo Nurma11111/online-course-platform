@@ -1,0 +1,109 @@
+version: '3.9'
+
+# ============================================================
+# docker-compose.yml — Online Course Platform
+# Author: Bekzhanuly Nurmukhamed
+# Services: app, postgres, pgadmin (optional)
+# ============================================================
+
+services:
+
+  # ── PostgreSQL Database ──────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: bekzhanuly_courseplatform_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-coursedb}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d:ro
+    networks:
+      - course_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_NAME:-coursedb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ── Spring Boot Application ──────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: bekzhanuly_courseplatform_app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-coursedb}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      # JWT
+      JWT_SECRET: ${JWT_SECRET:-BekzhanulYNurmukhamedSuperSecretKeyForJWTTokenGeneration2024VeryLongKey}
+      # File storage
+      FILE_UPLOAD_DIR: /app/uploads
+      # Spring profile
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads_data:/app/uploads
+      - app_logs:/app/logs
+    networks:
+      - course_network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+        labels: "service=courseplatform"
+
+  # ── PgAdmin (optional, dev tool) ─────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: bekzhanuly_courseplatform_pgadmin
+    restart: unless-stopped
+    profiles:
+      - dev
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@course.kz}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - course_network
+
+# ── Networks ─────────────────────────────────────────────────
+networks:
+  course_network:
+    driver: bridge
+    name: bekzhanuly_course_network
+
+# ── Volumes ──────────────────────────────────────────────────
+volumes:
+  postgres_data:
+    name: bekzhanuly_postgres_data
+  uploads_data:
+    name: bekzhanuly_uploads_data
+  app_logs:
+    name: bekzhanuly_app_logs
